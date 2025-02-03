@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring</title>
+    <link rel="icon" href="images/icon.png" type="image/png">
+
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('images/background4.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #000, #444);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px;
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dashboard table th, .dashboard table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .dashboard table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .download-btn {
+            padding: 5px 8px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            padding: 5px 8px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Solver Section */
+        .solver-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .solver-section label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 14px;
+        }
+        .solver-section input, .solver-section select {
+            width: 90%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .initialize-btn {
+            padding: 8px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .initialize-btn:hover {
+            background-color: #218838;
+        }
+        #format-instruction {
+            font-size: 12px;
+            color: #555;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        /* API Key Reminder */
+        .api-key-reminder {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .api-key-reminder a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .api-key-reminder a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Process Monitoring</h1>
+        <nav>
+            <a href="home.html">Home</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard Section -->
+        <section class="dashboard" id="dashboard">
+            <h2>Dashboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job ID</th>
+                        <th>Solver</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Time to Solve (s)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="processesList">
+                    <!-- Processes will be dynamically added here -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Solver Section -->
+        <section class="solver-section">
+            <h2>Initialize New Process</h2>
+            <label for="solver">Select Optimization Solver:</label>
+            <select id="solver" onchange="updateFormatInstruction()">
+                <option value="">-- Select Solver --</option>
+                <!-- Dynamic options will be populated here -->
+            </select>
+
+            <p id="format-instruction">Data Format: Select a solver to see format instructions.</p>
+
+            <label for="dataFile">Attach Data JSON File:</label>
+            <input type="file" id="dataFile" accept=".json">
+
+            <button class="initialize-btn" onclick="initializeProcess()">Initialize Process</button>
+        </section>
+
+        <!-- API Key Reminder -->
+        <div class="api-key-reminder">
+            <p>Don't have an API key? <a href="api_help.html">Go to API Help</a> to generate one.</p>
+        </div>
+    </main>
+
+    <script>
+        let solvers = [];
+
+        // Fetch solvers dynamically
+        function fetchSolvers() {
+            fetch('/api-solvers')
+                .then(response => response.json())
+                .then(data => {
+                    solvers = data;
+                    const solverSelect = document.getElementById('solver');
+
+                    // Populate the solver dropdown
+                    solvers.forEach(solver => {
+                        const option = document.createElement('option');
+                        option.value = solver.solver_id;
+                        option.textContent = solver.solver_name;
+                        solverSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching solvers:', error);
+                });
+        }
+        // Update format instructions based on the selected solver
+        function updateFormatInstruction() {
+            const solverId = document.getElementById('solver').value;
+            const instruction = document.getElementById('format-instruction');
+
+            const selectedSolver = solvers.find(solver => solver.solver_id === parseInt(solverId));
+            if (selectedSolver) {
+                instruction.innerText = selectedSolver.description || 'No description available.';
+            } else {
+                instruction.innerText = 'Select a solver to see format instructions.';
+            }
+        }
+
+        function loadProcesses() {
+            fetch('/get-processes')
+                .then(response => response.json())
+                .then(data => {
+                    const processesList = document.getElementById('processesList');
+                    processesList.innerHTML = ''; // Clear the table
+
+                    data.forEach(process => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${process.job_id}</td>
+                            <td>${process.solver_name || 'Unknown'}</td>
+                            <td>${process.status}</td>
+                            <td>${new Date(process.created_at).toLocaleString()}</td>
+                            <td>${process.time_to_solve !== null ? process.time_to_solve : 'N/A'}</td>
+                            <td>
+                                <div class="button-container">
+                                    <button class="download-btn" onclick="downloadResult(${process.job_id})">Download Result</button>
+                                    <button class="delete-btn" onclick="deleteProcess(${process.job_id})">Delete Process</button>
+                                </div>
+                            </td>
+                        `;
+                        processesList.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading processes:', error);
+                });
+        }
+
+        // Initialize a new process
+        function initializeProcess() {
+            const solver = document.getElementById('solver').value;
+            const dataFile = document.getElementById('dataFile').files[0];
+
+            if (!solver || !dataFile) {
+                alert("Please fill in all fields and attach a JSON file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('solver_id', solver);
+            formData.append('dataFile', dataFile);
+
+            fetch('/initialize-process', {
+                method: 'POST',
+                body: formData, // Send the form data with the file
+            })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    loadProcesses(); // Reload the processes list
+                })
+                .catch(error => {
+                    console.error('Error initializing process:', error);
+                    alert('Failed to initialize process. Please try again.');
+                });
+        }
+
+        // Delete a process
+        function deleteProcess(jobId) {
+            fetch('/delete-process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ job_id: jobId }),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Process deleted successfully!');
+                        loadProcesses();
+                    } else {
+                        throw new Error('Failed to delete process.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting process:', error);
+                });
+        }
+
+        // Download result data
+        function downloadResult(jobId) {
+            fetch(`/download-result/${jobId}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to download result.');
+                    }
+                })
+                .then(data => {
+                    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `result_job_${jobId}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('Error downloading result:', error);
+                });
+        }
+
+        // Call fetchSolvers on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSolvers();
+            loadProcesses();
+        });
+    </script>
+</body>
+</html>

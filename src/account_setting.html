@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings</title>
+    <link rel="icon" href="images/icon.png" type="image/png">
+
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #000, #444);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header img {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Centered Buttons */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+            text-align: center;
+        }
+        .action-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .section-divider {
+            margin: 20px 0;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <a href="home.html"><img src="images/icon.png" alt="Mohassin Icon"></a>
+        <nav>
+            <a href="home.html">Home</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <h2>Account Settings</h2>
+
+        <!-- Display Email and Username -->
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" value="">
+        </div>
+        <div class="button-container">
+            <button class="action-btn" onclick="updateUsername()">Update Username</button>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Change Password Section -->
+        <div>
+            <h3>Change Password</h3>
+            <div class="form-group">
+                <label>New Password:</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="button-container">
+                <button class="action-btn" onclick="changePassword()">Change Password</button>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Delete Account Section -->
+        <div>
+            <h3>Delete Account</h3>
+            <p style="color: #dc3545;">Warning: This action cannot be undone!</p>
+            <div class="button-container">
+                <button class="action-btn delete-btn" onclick="deleteAccount()">Delete My Account</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Fetch and display current user info
+        fetch('/account-info')
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch account info.');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.email && data.username) {
+                    document.getElementById('email').value = data.email;
+                    document.getElementById('username').value = data.username;
+                } else {
+                    console.error('Invalid account data:', data);
+                    alert('Error loading account information.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching account info:', error);
+                alert('Could not load account information. Please try again later.');
+            });
+
+
+        function updateUsername() {
+            const newUsername = document.getElementById('username').value;
+            fetch('/update-username', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: newUsername }),
+            }).then((response) => {
+                if (response.ok) {
+                    alert('Username updated successfully!');
+                } else {
+                    alert('Error updating username.');
+                }
+            });
+        }
+
+        function changePassword() {
+    const newPassword = document.getElementById('newPassword').value.trim();
+
+    if (!newPassword) {
+        alert('Please enter a new password.');
+        return;
+    }
+
+    // Log the password to debug
+    console.log('Password to send:', newPassword);
+
+    fetch('/change-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to change password');
+            }
+        })
+        .then((data) => {
+            alert('Password changed successfully! Redirecting to login...');
+            window.location.href = data.redirect;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Error changing password. Please try again.');
+        });
+}
+
+
+
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone!')) {
+                fetch('/delete-account', {
+                    method: 'POST',
+                }).then((response) => {
+                    if (response.ok) {
+                        alert('Account deleted successfully.');
+                        window.location.href = '/';
+                    } else {
+                        alert('Error deleting account.');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

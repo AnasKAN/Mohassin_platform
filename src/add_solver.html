@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Solver</title>
+    <link rel="icon" href="images/icon.png" type="image/png">
+
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('images/background5.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #000, #444);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header img {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group input[type="file"] {
+            padding: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <a href="home.html"><img src="images/icon.png" alt="Mohassin Icon"></a>
+        <nav>
+            <a href="home.html">Back to Home</a>
+        </nav>
+    </header>
+
+    <!-- Solver Submission Form -->
+    <form class="form-container" id="submitSolverForm">
+        <div class="form-group">
+            <label for="solverName">Solver Name:</label>
+            <input type="text" id="solverName" name="solverName" placeholder="Enter solver name" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" placeholder="Describe how the JSON data your solver accepts..." required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="moduleName">Module Name:</label>
+            <input type="text" id="moduleName" name="moduleName" placeholder="e.g., optimizers.hajj_tafweej_scheduling_optimizer" required>
+        </div>
+        <div class="form-group">
+            <label for="className">Class Name:</label>
+            <input type="text" id="className" name="className" placeholder="e.g., Tafweej_Scheduling_Optimizer" required>
+        </div>
+        <div class="form-group">
+            <label for="file">Upload Solver File:</label>
+            <input type="file" id="file" name="file" accept=".py" required>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('submitSolverForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            const formData = new FormData();
+            formData.append('solverName', document.getElementById('solverName').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('moduleName', document.getElementById('moduleName').value);
+            formData.append('className', document.getElementById('className').value);
+            formData.append('file', document.getElementById('file').files[0]);
+
+            fetch('/submit-solver', {
+                method: 'POST',
+                body: formData,
+            })
+            .then((response) => {
+                if (response.ok) {
+                    alert('Solver submitted successfully!');
+                    document.getElementById('submitSolverForm').reset();
+                } else {
+                    throw new Error('Error submitting solver.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to submit solver.');
+            });
+        });
+    </script>
+</body>
+</html>

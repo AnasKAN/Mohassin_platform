@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="icon" href="/images/icon.png" type="image/png">
+
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('images/background2.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background-color: rgba(0, 123, 255, 0.9);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        /* Main Content */
+        main {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .dashboard-box {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            max-width: 500px;
+            text-align: left;
+        }
+        .dashboard-box h2 {
+            margin-top: 0;
+            color: #007bff;
+            text-align: center;
+        }
+        .dashboard-box p {
+            margin: 10px 0;
+        }
+
+        .add-solver {
+            margin-top: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .add-solver h3 {
+            color: #28a745;
+        }
+        .add-solver button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-solver button:hover {
+            background-color: #218838;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(52, 58, 64, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+        }
+        footer a {
+            color: #17a2b8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Welcome to Mohassin</h1>
+        <nav>
+            <a href="account_setting.html">Account Settings</a>
+            <a href="api_help.html">API Help</a>
+            <a href="monitoring.html">Monitoring</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard Section -->
+        <section>
+            <div class="dashboard-box">
+                <h2>Dashboard</h2>
+                <p><strong>API Keys Activated:</strong> <span id="apiKeyCount">0</span></p>
+                <ul id="apiKeysList" style="list-style: none; padding: 0;">
+                    <!-- API Keys will be dynamically added here -->
+                </ul>
+                
+                <p><strong>Base URL:</strong> <code>https://fastapi-mohassin-a6dc3af681d9.herokuapp.com/</code></p>
+            </div>
+        </section>
+
+        <!-- Add Your Solver Section -->
+        <section class="add-solver">
+            <h3>Want to Contribute Your Optimization Solver?</h3>
+            <p>Help other researchers process their data by adding your solver to the platform.</p>
+            <button onclick="window.location.href='add_solver.html'">Add Your Solver</button>
+        </section>
+        <!-- Logout Button -->
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="window.location.href='/logout'" style="
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        ">
+            Logout
+        </button>
+    </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Mohassin Platform. All rights reserved. | <a href="#contact-us">Contact Us</a></p>
+    </footer>
+
+    
+
+    <script>
+        // Fetch and display API keys in the dashboard
+        function loadDashboardData() {
+            fetch('/get-api-keys')
+                .then((response) => response.json())
+                .then((data) => {
+                    const apiKeysList = document.getElementById('apiKeysList');
+                    const apiKeyCount = document.getElementById('apiKeyCount');
+
+                    apiKeysList.innerHTML = ''; // Clear the list
+                    apiKeyCount.textContent = data.length; // Set the number of active keys
+
+                    data.forEach((key, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <p><strong>Key ${index + 1}:</strong> ${key.apiKey} | <strong>Expires:</strong> ${key.keyExpirationDate}</p>
+                        `;
+                        apiKeysList.appendChild(listItem);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching dashboard data:', error);
+                });
+        }
+
+        // Load dashboard data on page load
+        loadDashboardData();
+    </script>
+</body>
+</html>

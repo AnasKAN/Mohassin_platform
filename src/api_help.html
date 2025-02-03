@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Help</title>
+    <link rel="icon" href="images/icon.png" type="image/png">
+
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('images/background6.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #000, #444);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header img {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px;
+        }
+        .api-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 40px 0;
+        }
+        .api-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .api-section button:hover {
+            background-color: #0056b3;
+        }
+        .api-panel {
+            width: 60%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-left: 20px;
+        }
+
+        /* Tutorial Section */
+        .tutorial {
+            margin-top: 40px;
+        }
+        .tutorial h2 {
+            color: #007bff;
+        }
+        .tutorial p {
+            margin: 10px 0;
+        }
+
+        /* Final Section */
+        .final-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .final-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .final-section button:hover {
+            background-color: #218838;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <a href="home.html"><img src="images/icon.png" alt="Mohassin Icon"></a>
+        <nav>
+            <a href="#contact-us">Contact Us</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- API Key Generator -->
+        <section class="api-section">
+            <div>
+                <button id="generateApiKey">Generate API Key</button>
+            </div>
+            <div class="api-panel" id="apiKeysPanel">
+                <h3>Generated API Keys:</h3>
+                <ul id="apiKeysList" style="list-style: none; padding: 0;"></ul>
+            </div>
+        </section>
+        <button id="clearKeysBtn" style="margin-top: 20px; background-color: #dc3545; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            Clear All API Keys
+        </button>
+
+        <!-- Tutorial Section -->
+        <section class="tutorial">
+            <h2 style="text-align: center; color: #007bff; margin-bottom: 20px;">How to Use the API Key</h2>
+            <p style="margin: 10px 0;">1. Go to <a href="monitoring.html" style="color: #007bff; text-decoration: underline;">Monitoring</a> to select your optimization solver.</p>
+            <p style="margin: 10px 0;">2. Use the generated API key to send your data to the solver.</p>
+            <p style="margin: 10px 0;">3. Ensure your data follows the correct format specified in the solver instructions.</p>
+        
+            <!-- Base URL -->
+            <div class="tutorial-section">
+                <h3>Base URL</h3>
+                <p style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <code>https://fastapi-mohassin-a6dc3af681d9.herokuapp.com/</code>
+                </p>
+            </div>
+        
+            <!-- JavaScript Example -->
+            <div class="tutorial-section">
+                <h3>JavaScript Example</h3>
+                <p>Use the following example to integrate the API with JavaScript:</p>
+                <pre style="background-color: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 5px; overflow-x: auto;">
+        <code>const axios = require('axios');
+        
+        // Base URL for the FastAPI server
+        const BASE_URL = "https://fastapi-mohassin-a6dc3af681d9.herokuapp.com";
+        
+        // Function to submit a job
+        async function submitJob(apiKey, optimizerId, jobData) {
+            try {
+                const payload = {
+                    optimizer_id: optimizerId,
+                    data: jobData
+                };
+        
+                const response = await axios.post(`${BASE_URL}/submit-job?api_key=${apiKey}`, payload, {
+                    headers: { "Content-Type": "application/json" }
+                });
+        
+                console.log("Job submitted successfully:", response.data);
+                return response.data.job_id;
+            } catch (error) {
+                console.error("Failed to submit job:", error.response ? error.response.data : error.message);
+                return null;
+            }
+        }
+        
+        // Function to fetch job results
+        async function getJobResult(apiKey, jobId) {
+            try {
+                const response = await axios.get(`${BASE_URL}/job-result/${jobId}?api_key=${apiKey}`);
+                console.log("Job result fetched:", JSON.stringify(response.data, null, 4));
+                return response.data;
+            } catch (error) {
+                console.error("Failed to fetch job result:", error.response ? error.response.data : error.message);
+                return null;
+            }
+        }
+        
+        // Main function to test the workflow
+        (async function main() {
+            const apiKey = "API-906D553E4107450D";
+            const optimizerId = 1;
+            const jobData = { example_param: "value" };
+        
+            const jobId = await submitJob(apiKey, optimizerId, jobData);
+            if (!jobId) return;
+        
+            await getJobResult(apiKey, jobId);
+        })();
+        </code>
+                </pre>
+            </div>
+        
+            <!-- cURL Usage -->
+            <div class="tutorial-section">
+                <h3>cURL Usage (Windows)</h3>
+                <p><strong>Submitting a Job:</strong></p>
+                <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 5px; overflow-x: auto;">
+        <code>curl.exe -X POST "https://fastapi-mohassin-a6dc3af681d9.herokuapp.com/submit-job?api_key=<your-api-key>" `
+        -H "Content-Type: application/json" `
+        --data "@C:\path\to\payload.json"
+        </code>
+                </pre>
+                <p><strong>Fetching Job Results:</strong></p>
+                <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 5px; overflow-x: auto;">
+        <code>curl.exe -X GET "https://fastapi-mohassin-a6dc3af681d9.herokuapp.com/job-result/<job-id>?api_key=<your-api-key>"
+        </code>
+                </pre>
+            </div>
+        
+            <!-- Python Tutorial -->
+            <div class="tutorial-section">
+                <h3>Python Tutorial (Google Colab)</h3>
+                <p>Test the API with Python using <a href="https://colab.research.google.com/drive/1yn9-xfeQH0yan_UbGqbz-8hdVhEFb55H?usp=sharing" target="_blank" style="color: #007bff; text-decoration: underline;">this Google Colab notebook</a>.</p>
+            </div>
+        </section>
+        
+
+        <!-- Adding Your Solver -->
+        <section class="final-section">
+            <h2>How to Add Your Optimization to the Platform</h2>
+            <p>Share your solver and make it available for researchers to process their data.</p>
+            <button onclick="window.location.href='add_solver.html'">Submit Your Solver</button>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact-us">
+        <p>Contact us at <a href="mailto:support@mohassin.com">support@mohassin.com</a></p>
+    </footer>
+
+    <script>
+        // Load all API keys for the user
+        function loadApiKeys() {
+            fetch('/get-api-keys')
+                .then((response) => response.json())
+                .then((data) => {
+                    const apiKeysList = document.getElementById('apiKeysList');
+                    apiKeysList.innerHTML = ''; // Clear the list
+                    data.forEach((key) => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <strong>API Key:</strong> ${key.apiKey}<br>
+                            <strong>Instantiated:</strong> ${key.keyInstantiatingDate}<br>
+                            <strong>Expires:</strong> ${key.keyExpirationDate}<br>
+                            <button onclick="deleteApiKey('${key.apiKey}')">Delete</button>
+                        `;
+                        apiKeysList.appendChild(listItem);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching API keys:', error);
+                });
+        }
+
+        // Generate a new API key
+        document.getElementById('generateApiKey').addEventListener('click', function () {
+            fetch('/generate-api-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert('API Key generated successfully!');
+                    loadApiKeys(); // Refresh the API keys list
+                })
+                .catch((error) => {
+                    console.error('Error generating API key:', error);
+                });
+        });
+
+        // Delete an API key
+        function deleteApiKey(apiKey) {
+            fetch('/delete-api-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ apiKey }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        alert('API Key deleted successfully!');
+                        loadApiKeys(); // Refresh the API keys list
+                    } else {
+                        throw new Error('Failed to delete API key');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error deleting API key:', error);
+                });
+        }
+
+        // Load API keys on page load
+        loadApiKeys();
+    </script>
+    <script>
+        // Clear all API keys
+        document.getElementById('clearKeysBtn').addEventListener('click', function () {
+            if (confirm('Are you sure you want to clear all generated API keys? This action cannot be undone.')) {
+                fetch('/clear-keys', {
+                    method: 'POST',
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            alert('All generated API keys have been cleared.');
+                            window.location.reload(); // Reload the page to update the UI
+                        } else {
+                            throw new Error('Failed to clear API keys.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error clearing keys:', error);
+                        alert('Error clearing keys. Please try again.');
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
